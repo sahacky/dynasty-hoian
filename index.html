@@ -293,10 +293,10 @@ function gmRoute(ids){const pts=ids.map(i=>byId[i]);const o=pts[0],d=pts[pts.len
 const RIDS=Object.fromEntries(Object.entries(DATA.routes).map(([k,r])=>[k,r.ids]));
 
 // ---- map
-const map=L.map('map',{zoomControl:false,minZoom:10,maxZoom:18,maxBounds:[[15.70,108.0],[16.20,108.6]]}).setView([V.lat,V.lon],14);
-function pad(){const h=map.getSize().y;return innerWidth<=820?{tl:[20,20],br:[20,Math.round(h*0.42)+20]}:{tl:[454,24],br:[24,24]}}
+const map=L.map('map',{zoomControl:false,attributionControl:false,minZoom:10,maxZoom:18,maxBounds:[[15.70,108.0],[16.20,108.6]]}).setView([V.lat,V.lon],14);
+function pad(){const h=map.getSize().y;return innerWidth<=820?{tl:[30,40],br:[30,Math.round(h*0.42)+64]}:{tl:[454,24],br:[24,24]}}
 function collapse(){$('#panel').classList.remove('exp')}
-function fit(b,mz){collapse();const p=pad();map.fitBounds(b,{paddingTopLeft:p.tl,paddingBottomRight:p.br,maxZoom:mz||16})}
+function fit(b,mz){collapse();map.closePopup();const p=pad();map.fitBounds(b,{paddingTopLeft:p.tl,paddingBottomRight:p.br,maxZoom:mz||16})}
 function focus(ll,z){collapse();const p=pad();const pt=L.point(map.project(ll,z)).subtract([(p.tl[0]-p.br[0])/2,(p.tl[1]-p.br[1])/2]);map.flyTo(map.unproject(pt,z),z)}
 function popOpts(){const p=pad();return {maxWidth:270,minWidth:230,autoPanPaddingTopLeft:L.point(p.tl[0],p.tl[1]+20),autoPanPaddingBottomRight:L.point(p.br[0],p.br[1])}}
 L.control.zoom({position:'topright'}).addTo(map);
@@ -319,11 +319,11 @@ DATA.points.forEach(p=>{
   markers[p.id].on('click',()=>selectPlace(p.id,false));
 });
 let rlayer=null;
-function showRoute(k,fit=true){
+function showRoute(k,doFit=true){
   if(rlayer){map.removeLayer(rlayer);rlayer=null}
   if(!k)return;const r=DATA.routes[k];
   rlayer=L.layerGroup([L.polyline(r.line,{color:RCOL[k],weight:14,opacity:.25}),L.polyline(r.line,{color:'#fff',weight:9,opacity:.95}),L.polyline(r.line,{color:RCOL[k],weight:5,opacity:.95,dashArray:k==='depart'?'1 0':null})]).addTo(map);
-  if(fit)fit(L.latLngBounds(r.line).pad(.05));
+  if(doFit)fit(L.latLngBounds(r.line).pad(.08),15);
 }
 const legend=L.control({position:'bottomright'});
 legend.onAdd=()=>{const d=L.DomUtil.create('div');d.innerHTML=`<button class="mapbtn" id="home">🏡 К вилле</button><button class="mapbtn" id="all">🔭 Всё на карте</button><div class="legend">${Object.values(CATS).map(c=>`${c.e} ${c.n}`).join('<br>')}<br><i class="badge free" style="position:static;display:inline-grid">✓</i> бесплатно &nbsp;<i class="badge paid" style="position:static;display:inline-grid">₫</i> платно</div>`;L.DomEvent.disableClickPropagation(d);return d};
@@ -349,7 +349,7 @@ function renderPlan(){
     if(ev.target.closest('a'))return;
     const e=DATA.plan[+el.dataset.i];
     document.querySelectorAll('.ev').forEach(x=>x.classList.toggle('on',x===el));
-    if(e.route){showRoute(e.route);if(e.pt)setTimeout(()=>markers[e.pt].openPopup(),400)}
+    if(e.route){showRoute(e.route)}
     else{showRoute(null);if(e.pt){focus([byId[e.pt].lat,byId[e.pt].lon],16);markers[e.pt].openPopup()}}
   });
 }
