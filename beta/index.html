@@ -22,7 +22,8 @@
 html{-webkit-text-size-adjust:100%}
 html,body{margin:0;height:100%;font-family:Manrope,system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-tap-highlight-color:transparent}
 a{color:inherit}
-.app{position:relative;height:100vh;height:100dvh;overflow:hidden}
+.app{position:relative;height:100vh;height:100dvh;overflow:hidden;overflow:clip}
+html,body{overflow:hidden;overscroll-behavior:none}
 #map{position:absolute;inset:0;z-index:0;background:#f2efe9}
 .panel{position:absolute;left:0;top:0;bottom:0;width:430px;z-index:500;display:flex;flex-direction:column;min-height:0;background:transparent;border-right:1px solid var(--line);box-shadow:10px 0 30px rgba(0,0,0,.25)}
 header{padding:calc(22px + env(safe-area-inset-top)) 20px 14px;position:relative;overflow:hidden;background:radial-gradient(120% 140% at 100% 0%,rgba(124,92,255,.45),transparent 55%),radial-gradient(90% 120% at 0% 0%,rgba(255,61,127,.35),transparent 60%),rgba(16,16,24,.72);backdrop-filter:blur(2.5px) saturate(1.3);-webkit-backdrop-filter:blur(2.5px) saturate(1.3);border-bottom:1px solid rgba(255,255,255,.08)}
@@ -335,13 +336,13 @@ function focus(ll,z){collapse();const p=pad();const pt=L.point(map.project(ll,z)
 function popOpts(){const p=pad();return {maxWidth:270,minWidth:230,autoPanPaddingTopLeft:L.point(p.tl[0],p.tl[1]+20),autoPanPaddingBottomRight:L.point(p.br[0],p.br[1])}}
 L.control.zoom({position:'topright'}).addTo(map);
 const blank='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#e9e7e1"/></svg>');
-const osm=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19});
+const osm=/[?&]osm/.test(location.search)?L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}):L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19});
 const sat=L.layerGroup([L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:18}),L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:18})]);
 let base=osm,isSat=false;
 const hasGL=(()=>{try{const c=document.createElement('canvas');return !!(c.getContext('webgl2')||c.getContext('webgl'))}catch(e){return false}})();
-if(hasGL&&L.maplibreGL&&!/[?&]osm/.test(location.search)){
+if(hasGL&&L.maplibreGL&&!/[?&](osm|esri)/.test(location.search)){
   const vec=L.maplibreGL({style:'https://tiles.openfreemap.org/styles/liberty',attribution:''});base=vec;vec.addTo(map);
-  setTimeout(()=>{let ok=false;try{const m=vec.getMaplibreMap();ok=m&&m.isStyleLoaded()}catch(e){}if(!ok&&base===vec&&!isSat){map.removeLayer(vec);base=osm;osm.addTo(map)}},8000);
+  setTimeout(()=>{let ok=false;try{const m=vec.getMaplibreMap();ok=m&&m.isStyleLoaded()&&m.areTilesLoaded()}catch(e){}if(!ok&&base===vec&&!isSat){map.removeLayer(vec);base=osm;osm.addTo(map)}},8000);
 }else osm.addTo(map);
 function toggleSat(){isSat=!isSat;if(isSat){map.removeLayer(base);sat.addTo(map)}else{map.removeLayer(sat);base.addTo(map)}document.querySelectorAll('.satbtn').forEach(x=>x.textContent=isSat?'🗺 Схема':'🛰 Спутник')}
 
@@ -477,6 +478,7 @@ $('.scroll').addEventListener('scroll',e=>{if(innerWidth<=820&&e.target.scrollTo
   };
 })();
 $('#home').onclick=goHome;$('#all').onclick=goAll;$('#home2').onclick=goHome;$('#all2').onclick=goAll;
+['scroll'].forEach(ev=>{const a=document.querySelector('.app');a.addEventListener(ev,()=>{if(a.scrollLeft||a.scrollTop){a.scrollLeft=0;a.scrollTop=0}})});window.addEventListener('scroll',()=>{if(scrollX||scrollY)scrollTo(0,0)});
 document.querySelectorAll('.satbtn').forEach(x=>x.onclick=toggleSat);
 // ---- countdown
 (function(){const s=new Date(2026,10,7,11,0),e=new Date(2026,10,8,14,0),n=new Date();let t;
