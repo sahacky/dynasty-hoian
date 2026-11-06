@@ -22,8 +22,8 @@
 html{-webkit-text-size-adjust:100%}
 html,body{margin:0;height:100%;font-family:Manrope,system-ui,sans-serif;color:var(--ink);background:var(--bg);-webkit-tap-highlight-color:transparent}
 a{color:inherit}
-.app{position:relative;height:100vh;height:100dvh;overflow:hidden;overflow:clip}
-html,body{overflow:hidden;overscroll-behavior:none}
+.app{position:fixed;inset:0;overflow:hidden;overflow:clip}
+html,body{overflow:hidden;overflow:clip;overscroll-behavior:none;position:fixed;inset:0}
 #map{position:absolute;inset:0;z-index:0;background:#e9e7e1}
 .panel{position:absolute;left:0;top:0;bottom:0;width:430px;z-index:500;display:flex;flex-direction:column;min-height:0;background:transparent;border-right:1px solid var(--line);box-shadow:10px 0 30px rgba(0,0,0,.25)}
 header{padding:calc(22px + env(safe-area-inset-top)) 20px 14px;position:relative;overflow:hidden;background:radial-gradient(120% 140% at 100% 0%,rgba(124,92,255,.45),transparent 55%),radial-gradient(90% 120% at 0% 0%,rgba(255,61,127,.35),transparent 60%),rgba(16,16,24,.72);backdrop-filter:blur(2.5px) saturate(1.3);-webkit-backdrop-filter:blur(2.5px) saturate(1.3);border-bottom:1px solid rgba(255,255,255,.08)}
@@ -335,14 +335,19 @@ L.control.zoom({position:'topright'}).addTo(map);
 const blank='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#e9e7e1"/></svg>');
 const cache={};
 function bundle(n){return cache[n]||(cache[n]=fetch('t/'+n+'.json').then(r=>r.ok?r.json():{}).catch(()=>({})))}
-const Local=L.GridLayer.extend({createTile(c,done){const img=document.createElement('img');img.alt='';const n=c.z+'-'+(c.x>>2)+'-'+(c.y>>2),k=c.z+'/'+c.x+'/'+c.y;
-  if(!TILES.has(n)){img.src=blank;setTimeout(()=>done(null,img));return img}
-  bundle(n).then(d=>{img.onload=()=>done(null,img);img.onerror=()=>done(null,img);img.src=d[k]?'data:image/jpeg;base64,'+d[k]:blank});return img}});
-new Local({maxNativeZoom:16,maxZoom:18,minZoom:10,attribution:'Tiles © Esri · Routes © OSRM/OpenStreetMap'}).addTo(map);
-const Hi=L.GridLayer.extend({createTile(c,done){const img=document.createElement('img');img.alt='';const z=c.z+1,n=z+'-'+(c.x>>2)+'-'+(c.y>>2),k=z+'/'+c.x+'/'+c.y;
-  if(!TILES.has(n)){setTimeout(()=>done(null,img));return img}
-  bundle(n).then(d=>{if(d[k]){img.onload=()=>done(null,img);img.onerror=()=>done(null,img);img.src='data:image/jpeg;base64,'+d[k]}else done(null,img)});return img}});
-if((window.devicePixelRatio||1)>1.2)new Hi({tileSize:128,minZoom:10,maxZoom:18,maxNativeZoom:15}).addTo(map);
+const imgCache=new Map();
+function tileImg(z,x,y){const k=z+'/'+x+'/'+y;if(imgCache.has(k))return imgCache.get(k);const n=z+'-'+(x>>2)+'-'+(y>>2);
+  const p=!TILES.has(n)?Promise.resolve(null):bundle(n).then(d=>d[k]?new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src='data:image/jpeg;base64,'+d[k]}):null);
+  imgCache.set(k,p);return p}
+const HI=(window.devicePixelRatio||1)>=1.5;
+const Local=L.GridLayer.extend({createTile(c,done){const S=HI?512:256,cv=document.createElement('canvas');cv.width=S;cv.height=S;const g=cv.getContext('2d');g.fillStyle='#e9e7e1';g.fillRect(0,0,S,S);
+  (async()=>{
+    if(HI&&c.z<16){const ch=await Promise.all([[0,0],[1,0],[0,1],[1,1]].map(([dx,dy])=>tileImg(c.z+1,2*c.x+dx,2*c.y+dy)));
+      if(ch.every(Boolean)){ch.forEach((im,i)=>g.drawImage(im,(i%2)*256,(i>>1)*256,256,256));return}}
+    for(let up=0;up<=3;up++){const z=c.z-up,f=1<<up,im=await tileImg(z,c.x>>up,c.y>>up);
+      if(im){const s=256/f,sx=(c.x%f)*s,sy=(c.y%f)*s;g.imageSmoothingQuality='high';g.drawImage(im,sx,sy,s,s,0,0,S,S);return}}
+  })().then(()=>done(null,cv),()=>done(null,cv));return cv}});
+new Local({maxNativeZoom:16,maxZoom:18,minZoom:10}).addTo(map);
 const priced=p=>!['home','shop','food','med'].includes(p.cat);
 function badge(p){return priced(p)?(p.price?'<i class="badge paid">₫</i>':'<i class="badge free">✓</i>'):''}
 function pills(p){return (p.top?'<span class="pill top">⭐ лучшее</span>':'')+(priced(p)?(p.price?`<span class="pill paid">${p.price.includes("₫")?p.price:"₫ "+p.price}</span>`:'<span class="pill free">✓ бесплатно</span>'):'')}
@@ -415,7 +420,7 @@ function selectPlace(id,fly){
   const p=byId[id];
   document.querySelectorAll('.card').forEach(x=>x.classList.toggle('on',x.dataset.id===id));
   if(fly&&p){showRoute(null);focus([p.lat,p.lon],p.d&&p.d.km>15?13:16);markers[id].openPopup()}
-  if(!fly&&id!=='villa'){const c=$('#c-'+id);if(c&&$('#v-places').classList.contains('on'))c.scrollIntoView({behavior:'smooth',block:'nearest'})}
+  if(!fly&&id!=='villa'){const c=$('#c-'+id);if(c&&$('#v-places').classList.contains('on')){const sc=c.closest('.scroll');sc.scrollTo({top:Math.max(0,c.offsetTop-sc.offsetTop-12),behavior:'smooth'})}}
 }
 renderFilters();renderList();
 
