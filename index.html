@@ -424,6 +424,7 @@ $('#kcopy').onclick=()=>copyText(packCL.text('🎒 Династия: что вз
 document.querySelectorAll('.golink').forEach(a=>a.onclick=e=>{e.preventDefault();const p=byId[a.dataset.id];showRoute(null);focus([p.lat,p.lon],p.lat>16?14:16);setTimeout(()=>markers[p.id].openPopup(),900)});
 document.querySelector('header').onclick=()=>{if(innerWidth<=820)$('#panel').classList.toggle('exp')};
 $('#mapfab').onclick=()=>collapse();
+$('.scroll').addEventListener('scroll',e=>{if(innerWidth<=820&&e.target.scrollTop>24)$('#panel').classList.add('exp')},{passive:true});
 // ---- countdown
 (function(){const s=new Date(2026,10,7,11,0),e=new Date(2026,10,8,14,0),n=new Date();let t;
  if(n<s){const h=Math.round((s-n)/36e5);t=h>=24?`⏳ через ${Math.round(h/24)} дн`:`⏳ через ${h} ч`}else if(n<e)t='🌴 Вы в Хойане';else t='✅ Поездка завершена';
