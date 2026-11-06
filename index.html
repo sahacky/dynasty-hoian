@@ -112,21 +112,54 @@ nav.tabs button.on{color:#111;background:#fff}
 .mapbtn{background:rgba(255,255,255,.95);color:#14141c;border:1px solid #e6e4ee;box-shadow:0 6px 20px rgba(0,0,0,.12);border-radius:12px;padding:9px 12px;font:inherit;font-weight:800;font-size:13px;cursor:pointer;margin-bottom:6px;display:block;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(120px);background:#fff;color:#111;padding:11px 18px;border-radius:14px;font-weight:800;font-size:13px;transition:.25s;z-index:9999}
 .toast.on{transform:translateX(-50%) translateY(0)}
+.grab{display:none}
 @media (max-width:820px){
-  .panel{top:calc(44vh - 18px);top:calc(44dvh - 18px);width:100%;border-right:0;border-radius:22px 22px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.35);overflow:hidden}
-  #map .leaflet-bottom{bottom:calc(56vh + 18px);bottom:calc(56dvh + 18px)}
-  header{padding:16px 16px 12px}
-  header h1{font-size:26px}
+  .panel{top:calc(58vh - 16px);top:calc(58dvh - 16px);width:100%;border-right:0;border-radius:18px 18px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.3);overflow:hidden;transition:top .3s ease}
+  .panel.exp{top:16vh;top:16dvh}
+  #map .leaflet-bottom{bottom:calc(42vh + 16px);bottom:calc(42dvh + 16px)}
+  #map .leaflet-bottom.leaflet-right{bottom:auto;top:calc(76px + env(safe-area-inset-top))}
+  #map .leaflet-bottom.leaflet-right .leaflet-control{margin-bottom:0}
+  .grab{display:block;position:absolute;top:6px;left:50%;width:38px;height:4px;margin-left:-19px;border-radius:2px;background:rgba(255,255,255,.45);z-index:3}
+  header{padding:14px 14px 8px;cursor:pointer}
+  header .kicker{font-size:9px;letter-spacing:.18em}
+  header h1{font-size:20px;margin:2px 0 0}
   header .meta{display:none}
-  header .chips{margin-top:8px}
-  .legend{display:none}.mapbtn{font-size:12px;padding:8px 10px}
-  nav.tabs{padding:8px 10px}
+  header .chips{margin-top:7px;gap:5px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  header .chips::-webkit-scrollbar{display:none}
+  header .chip{font-size:10.5px;padding:3px 8px;flex:none}
+  nav.tabs{padding:5px 8px;gap:2px}
+  nav.tabs button{font-size:12px;padding:6px 2px;border-radius:9px}
+  .scroll{padding:10px 10px calc(30px + env(safe-area-inset-bottom))}
+  .seg{margin-bottom:10px;padding:3px}.seg button{font-size:12px;padding:6px}
+  .ev{grid-template-columns:40px 1fr;gap:14px;padding:3px 0}
+  .tl:before{left:47px}
+  .ev .t{font-size:11px;padding-top:10px}
+  .ev .b{padding:9px 11px;border-radius:13px}
+  .ev .b:before{left:-12px;top:13px;width:8px;height:8px}
+  .ev h3{font-size:13.5px;margin-bottom:2px}
+  .ev p{font-size:12px;line-height:1.45}
+  .rt{font-size:11px;padding:3px 8px;margin-top:7px}
+  .filters{margin:0 -10px 8px;padding:0 10px 2px;gap:5px}
+  .filters button{font-size:11.5px;padding:5px 9px}
+  .card{grid-template-columns:34px 1fr;gap:10px;padding:10px;border-radius:13px;margin-bottom:7px}
+  .ico{width:34px;height:34px;border-radius:10px;font-size:16px}
+  .card h3{font-size:13.5px}.card .sub{font-size:11px}.card .d{font-size:11px;margin-top:4px}.card p{font-size:12px}
+  .pill{font-size:10px;padding:2px 7px}
+  .box{padding:12px;border-radius:13px}.box h3{font-size:14px}.box p,.box li{font-size:12.5px}
+  .check li{font-size:13px;padding:7px 0}.check input{width:18px;height:18px}
+  .btn{font-size:12px;padding:8px 11px}
+  .phr b{font-size:14px}
+  .legend{display:none}.mapbtn{font-size:11px;padding:6px 9px;border-radius:10px;margin-bottom:5px}
+  .leaflet-control-zoom a{width:30px!important;height:30px!important;line-height:30px!important;font-size:18px!important}
+  .pw{transform:scale(.78);transform-origin:17px 34px}
+  .pw:has(.big){transform-origin:22px 44px}
+  .leaflet-control-attribution{font-size:9px}
 }
 </style>
 </head>
 <body>
 <div class="app">
-  <aside class="panel">
+  <aside class="panel" id="panel"><div class="grab"></div>
     <header>
       <div class="kicker">Hoi An Weekend · 7–8 ноября</div>
       <h1>ДИНАСТИЯ</h1>
@@ -230,9 +263,10 @@ const RIDS=Object.fromEntries(Object.entries(DATA.routes).map(([k,r])=>[k,r.ids]
 
 // ---- map
 const map=L.map('map',{zoomControl:false,minZoom:10,maxZoom:18,maxBounds:[[15.70,108.0],[16.20,108.6]]}).setView([V.lat,V.lon],14);
-function pad(){const h=map.getSize().y;return innerWidth<=820?{tl:[24,24],br:[24,Math.round(h*0.56)+24]}:{tl:[454,24],br:[24,24]}}
-function fit(b,mz){const p=pad();map.fitBounds(b,{paddingTopLeft:p.tl,paddingBottomRight:p.br,maxZoom:mz||16})}
-function focus(ll,z){const p=pad();const pt=L.point(map.project(ll,z)).subtract([(p.tl[0]-p.br[0])/2,(p.tl[1]-p.br[1])/2]);map.flyTo(map.unproject(pt,z),z)}
+function pad(){const h=map.getSize().y;return innerWidth<=820?{tl:[20,20],br:[20,Math.round(h*0.42)+20]}:{tl:[454,24],br:[24,24]}}
+function collapse(){$('#panel').classList.remove('exp')}
+function fit(b,mz){collapse();const p=pad();map.fitBounds(b,{paddingTopLeft:p.tl,paddingBottomRight:p.br,maxZoom:mz||16})}
+function focus(ll,z){collapse();const p=pad();const pt=L.point(map.project(ll,z)).subtract([(p.tl[0]-p.br[0])/2,(p.tl[1]-p.br[1])/2]);map.flyTo(map.unproject(pt,z),z)}
 function popOpts(){const p=pad();return {maxWidth:270,minWidth:230,autoPanPaddingTopLeft:L.point(p.tl[0],p.tl[1]+20),autoPanPaddingBottomRight:L.point(p.br[0],p.br[1])}}
 L.control.zoom({position:'topright'}).addTo(map);
 const blank='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256"><rect width="256" height="256" fill="#e9e7e1"/></svg>');
@@ -356,6 +390,7 @@ $('#copy').onclick=()=>copyText(shopCL.text('🍖 Барбекю «Династ�
 $('#kcopy').onclick=()=>copyText(packCL.text('🎒 Династия: что взять в Хойан'));
 
 document.querySelectorAll('.golink').forEach(a=>a.onclick=e=>{e.preventDefault();const p=byId[a.dataset.id];showRoute(null);focus([p.lat,p.lon],p.lat>16?14:16);setTimeout(()=>markers[p.id].openPopup(),900)});
+document.querySelector('header').onclick=()=>{if(innerWidth<=820)$('#panel').classList.toggle('exp')};
 // ---- countdown
 (function(){const s=new Date(2026,10,7,11,0),e=new Date(2026,10,8,14,0),n=new Date();let t;
  if(n<s){const h=Math.round((s-n)/36e5);t=h>=24?`⏳ через ${Math.round(h/24)} дн`:`⏳ через ${h} ч`}else if(n<e)t='🌴 Вы в Хойане';else t='✅ Поездка завершена';
