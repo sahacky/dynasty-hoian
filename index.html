@@ -330,6 +330,7 @@ document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.t));
   ls.set('tab',b.dataset.t);
+  if(innerWidth<=820)$('#panel').classList.toggle('exp',['shop','pack','info'].includes(b.dataset.t));
 });
 
 // ---- plan
