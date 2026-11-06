@@ -327,7 +327,7 @@ const RIDS=Object.fromEntries(Object.entries(DATA.routes).map(([k,r])=>[k,r.ids]
 const map=L.map('map',{zoomControl:false,attributionControl:false,minZoom:10,maxZoom:18,maxBounds:[[15.2,107.5],[16.7,109.1]]}).setView([V.lat,V.lon],14);
 function pad(){const h=map.getSize().y;return innerWidth<=820?{tl:[30,40],br:[30,Math.round(h*0.42)+64]}:{tl:[454,24],br:[24,24]}}
 function collapse(){$('#panel').classList.remove('exp')}
-function fit(b,mz){collapse();map.closePopup();const p=pad();map.fitBounds(b,{paddingTopLeft:p.tl,paddingBottomRight:p.br,maxZoom:mz||16})}
+function fit(b,mz,keep){if(!keep)collapse();map.closePopup();const p=pad();map.fitBounds(b,{paddingTopLeft:p.tl,paddingBottomRight:p.br,maxZoom:mz||16})}
 function focus(ll,z){collapse();const p=pad();const pt=L.point(map.project(ll,z)).subtract([(p.tl[0]-p.br[0])/2,(p.tl[1]-p.br[1])/2]);map.flyTo(map.unproject(pt,z),z)}
 function popOpts(){const p=pad();return {maxWidth:270,minWidth:230,autoPanPaddingTopLeft:L.point(p.tl[0],p.tl[1]+20),autoPanPaddingBottomRight:L.point(p.br[0],p.br[1])}}
 L.control.zoom({position:'topright'}).addTo(map);
@@ -367,7 +367,7 @@ document.querySelectorAll('nav.tabs button').forEach(b=>b.onclick=()=>{
   document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.toggle('on',x===b));
   document.querySelectorAll('.view').forEach(v=>v.classList.toggle('on',v.id==='v-'+b.dataset.t));
   ls.set('tab',b.dataset.t);
-  if(innerWidth<=820)$('#panel').classList.toggle('exp',['shop','pack','info'].includes(b.dataset.t));
+  if(innerWidth<=820)$('#panel').classList.toggle('exp',['places','shop','pack','info'].includes(b.dataset.t));
 });
 
 // ---- plan
@@ -394,7 +394,7 @@ function renderFilters(){
   $('#pfilters').innerHTML=[['all','Любая цена'],['free','✓ Бесплатные'],['paid','₫ Платные'],['top','⭐ Лучшие']].map(([k,n])=>`<button data-p="${k}" class="${k===pf?'on':''}">${n}</button>`).join('');
   document.querySelectorAll('#pfilters button').forEach(b=>b.onclick=()=>{pf=b.dataset.p;renderFilters();renderList();applyMarkers()});
   document.querySelectorAll('#filters button').forEach(b=>b.onclick=()=>{cat=b.dataset.c;renderFilters();renderList();applyMarkers();
-    const ps=DATA.points.filter(visible);showRoute(null);fit(L.latLngBounds(ps.map(p=>[p.lat,p.lon])))});
+    const ps=DATA.points.filter(visible);showRoute(null);fit(L.latLngBounds(ps.map(p=>[p.lat,p.lon])),16,true)});
 }
 const passP=p=>pf==='all'||(pf==='top'?p.top:pf==='free'?(priced(p)&&!p.price):(pf==='paid'&&!!p.price));
 const visible=p=>p.id==='villa'||((cat==='all'||p.cat===cat)&&passP(p));
