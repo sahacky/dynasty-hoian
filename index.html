@@ -112,6 +112,26 @@ nav.tabs button.on{color:#111;background:#fff}
 .mapbtn{background:rgba(255,255,255,.95);color:#14141c;border:1px solid #e6e4ee;box-shadow:0 6px 20px rgba(0,0,0,.12);border-radius:12px;padding:9px 12px;font:inherit;font-weight:800;font-size:13px;cursor:pointer;margin-bottom:6px;display:block;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom));transform:translateX(-50%) translateY(120px);background:#fff;color:#111;padding:11px 18px;border-radius:14px;font-weight:800;font-size:13px;transition:.25s;z-index:9999}
 .toast.on{transform:translateX(-50%) translateY(0)}
+
+/* compact overrides */
+header{padding:calc(14px + env(safe-area-inset-top)) 16px 10px}
+.hrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+header h1{font-size:24px;margin:0}
+header .chips{margin-top:8px;gap:5px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+header .chips::-webkit-scrollbar{display:none}
+header .chip{font-size:11px;padding:3px 9px;flex:none}
+.hrow .chip{flex:none}
+nav.tabs{padding:7px 10px}
+nav.tabs button{font-size:12.5px;padding:7px 2px}
+.ev h3{font-size:14px}.ev p{font-size:12.5px}
+.card h3{font-size:14px}.card p{font-size:12.5px}
+.box h3{font-size:14px}.box p,.box li{font-size:12.5px;line-height:1.5}
+.check li{font-size:13px;padding:7px 0}.check small{font-size:11.5px}.check input{width:17px;height:17px}
+.grp{font-size:10px;margin:12px 0 2px}
+.phr b{font-size:13.5px}.phr small{font-size:11.5px}
+.pin{width:28px;height:28px;border-width:2px}.pin span{font-size:13px}
+.pin.big{width:36px;height:36px}.pin.big span{font-size:17px}
+.badge{min-width:15px;height:15px;font-size:9px;right:-6px;top:-6px;border-width:1.5px}
 .grab{display:none}
 @media (max-width:820px){
   .panel{top:calc(58vh - 16px);top:calc(58dvh - 16px);width:100%;border-right:0;border-radius:18px 18px 0 0;box-shadow:0 -8px 24px rgba(0,0,0,.3);overflow:hidden;transition:top .3s ease}
@@ -120,13 +140,13 @@ nav.tabs button.on{color:#111;background:#fff}
   #map .leaflet-bottom.leaflet-right{bottom:auto;top:calc(76px + env(safe-area-inset-top))}
   #map .leaflet-bottom.leaflet-right .leaflet-control{margin-bottom:0}
   .grab{display:block;position:absolute;top:6px;left:50%;width:38px;height:4px;margin-left:-19px;border-radius:2px;background:rgba(255,255,255,.45);z-index:3}
-  header{padding:14px 14px 8px;cursor:pointer}
-  header .kicker{font-size:9px;letter-spacing:.18em}
-  header h1{font-size:20px;margin:2px 0 0}
+  header{padding:12px 12px 7px;cursor:pointer}
+  header h1{font-size:17px}
+  .hrow .chip{font-size:10px;padding:2px 8px}
   header .meta{display:none}
-  header .chips{margin-top:7px;gap:5px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  header .chips{margin-top:6px;gap:5px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
   header .chips::-webkit-scrollbar{display:none}
-  header .chip{font-size:10.5px;padding:3px 8px;flex:none}
+  header .chip{font-size:10px;padding:2px 7px;flex:none}
   nav.tabs{padding:5px 8px;gap:2px}
   nav.tabs button{font-size:12px;padding:6px 2px;border-radius:9px}
   .scroll{padding:10px 10px calc(30px + env(safe-area-inset-bottom))}
@@ -136,23 +156,24 @@ nav.tabs button.on{color:#111;background:#fff}
   .ev .t{font-size:11px;padding-top:10px}
   .ev .b{padding:9px 11px;border-radius:13px}
   .ev .b:before{left:-12px;top:13px;width:8px;height:8px}
-  .ev h3{font-size:13.5px;margin-bottom:2px}
-  .ev p{font-size:12px;line-height:1.45}
+  .ev h3{font-size:13px;margin-bottom:2px}
+  .ev p{font-size:11.5px;line-height:1.45}
   .rt{font-size:11px;padding:3px 8px;margin-top:7px}
   .filters{margin:0 -10px 8px;padding:0 10px 2px;gap:5px}
   .filters button{font-size:11.5px;padding:5px 9px}
   .card{grid-template-columns:34px 1fr;gap:10px;padding:10px;border-radius:13px;margin-bottom:7px}
   .ico{width:34px;height:34px;border-radius:10px;font-size:16px}
-  .card h3{font-size:13.5px}.card .sub{font-size:11px}.card .d{font-size:11px;margin-top:4px}.card p{font-size:12px}
+  .card h3{font-size:13px}.card .sub{font-size:10.5px}.card .d{font-size:10.5px;margin-top:3px}.card p{font-size:11.5px}
   .pill{font-size:10px;padding:2px 7px}
-  .box{padding:12px;border-radius:13px}.box h3{font-size:14px}.box p,.box li{font-size:12.5px}
-  .check li{font-size:13px;padding:7px 0}.check input{width:18px;height:18px}
+  .box{padding:11px;border-radius:13px}.box h3{font-size:13px}.box p,.box li{font-size:11.5px}
+  .check li{font-size:12px;padding:6px 0}.check small{font-size:10.5px}.check input{width:16px;height:16px}
+  .grp{font-size:9.5px}
   .btn{font-size:12px;padding:8px 11px}
-  .phr b{font-size:14px}
+  .phr b{font-size:12.5px}.phr small{font-size:10.5px}
   .legend{display:none}.mapbtn{font-size:11px;padding:6px 9px;border-radius:10px;margin-bottom:5px}
   .leaflet-control-zoom a{width:30px!important;height:30px!important;line-height:30px!important;font-size:18px!important}
-  .pw{transform:scale(.78);transform-origin:17px 34px}
-  .pw:has(.big){transform-origin:22px 44px}
+  .pw{transform:scale(.85);transform-origin:14px 28px}
+  .pw:has(.big){transform-origin:18px 36px}
   .leaflet-control-attribution{font-size:9px}
 }
 </style>
@@ -161,10 +182,8 @@ nav.tabs button.on{color:#111;background:#fff}
 <div class="app">
   <aside class="panel" id="panel"><div class="grab"></div>
     <header>
-      <div class="kicker">Hoi An Weekend · 7–8 ноября</div>
-      <h1>ДИНАСТИЯ</h1>
-      <div class="meta">Tanthoi Villa · бассейн, барбекю и байки 🛵🔥</div>
-      <div class="chips"><span class="chip hot" id="cd"></span><span class="chip">👥 10</span><span class="chip">🛵 5 байков</span><span class="chip">Сб · заезд 14:00</span><span class="chip">Вс · выезд 14:00</span></div>
+      <div class="hrow"><h1>ДИНАСТИЯ</h1><span class="chip hot" id="cd"></span></div>
+      <div class="chips"><span class="chip">Hoi An · 7–8 нояб</span><span class="chip">👥 10</span><span class="chip">🛵 5</span><span class="chip">Заезд сб 14:00</span><span class="chip">Выезд вс 14:00</span></div>
     </header>
     <nav class="tabs">
       <button data-t="plan" class="on">План</button>
@@ -279,7 +298,7 @@ new Local({maxNativeZoom:16,maxZoom:18,minZoom:10,attribution:'Tiles © Esri · 
 const priced=p=>!['home','shop','food','med'].includes(p.cat);
 function badge(p){return priced(p)?(p.price?'<i class="badge paid">₫</i>':'<i class="badge free">✓</i>'):''}
 function pills(p){return (p.top?'<span class="pill top">⭐ лучшее</span>':'')+(priced(p)?(p.price?`<span class="pill paid">${p.price.includes("₫")?p.price:"₫ "+p.price}</span>`:'<span class="pill free">✓ бесплатно</span>'):'')}
-function icon(p,big){const c=CATS[p.cat];return L.divIcon({className:'',html:`<div class="pw"><div class="pin${big?' big':''}" style="background:${p.id==='danang'?'#FF3D7F':'#14141C'}"><span>${p.id==='danang'?'🏙':c.e}</span></div>${badge(p)}</div>`,iconSize:big?[44,44]:[34,34],iconAnchor:big?[22,44]:[17,34],popupAnchor:[0,-34]})}
+function icon(p,big){const c=CATS[p.cat];return L.divIcon({className:'',html:`<div class="pw"><div class="pin${big?' big':''}" style="background:${p.id==='danang'?'#FF3D7F':'#14141C'}"><span>${p.id==='danang'?'🏙':c.e}</span></div>${badge(p)}</div>`,iconSize:big?[36,36]:[28,28],iconAnchor:big?[18,36]:[14,28],popupAnchor:[0,-28]})}
 const markers={};
 DATA.points.forEach(p=>{
   const d=(p.d?`<div class="s">🛵 ${p.d.km} км · ~${p.d.min} мин от виллы</div>`:'')+pills(p);
